@@ -1,5 +1,5 @@
 /****************************************************************************
- * Copyright (c) 2012, the Konoha project authors. All rights reserved.
+ * Copyright (c) 2013, the Konoha project authors. All rights reserved.
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *
@@ -22,21 +22,53 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
-#include <stdio.h>
-#include "konoha3/konoha.h"
+#ifndef MODULE_H
+#define MODULE_H
 
-int main(int argc, const char *argv[])
+#ifndef kunused
+#define kunused __attribute__((unused))
+#endif /* kunused */
+
+#ifdef USE_EXECUTIONENGINE
+/*----------------------------------------------------------------------------*/
+/* Konoha AST API */
+static kunused kNode* kNode_getFirstBlock(KonohaContext *kctx, kNode *stmt)
 {
-    assert(sizeof(kObject) <= 64);
-    assert(sizeof(KMethodFunc) == sizeof(void *));
-    assert(sizeof(float) <= sizeof(void *));
-    assert(sizeof(kint_t) == sizeof(kfloat_t));
-    assert(sizeof(kint_t) == sizeof(void *));
-    assert(sizeof(KonohaStack) == sizeof(krbp_t) * 2);
-    assert(sizeof(krbp_t) == sizeof(void *));
-    assert(sizeof(intptr_t) == sizeof(kint_t));
-    assert(sizeof(kshort_t) * 2 == sizeof(intptr_t));
-    fprintf(stderr, "%d\n", (int)sizeof(kObject));
-    fprintf(stderr, "%d\n", (int)sizeof(KClass));
-    return 0;
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_BlockPattern, K_NULLBLOCK);
 }
+
+static kunused kNode* kNode_getElseBlock(KonohaContext *kctx, kNode *stmt)
+{
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_else, K_NULLBLOCK);
+}
+
+static kunused kNode* kNode_getFirstNode(KonohaContext *kctx, kNode *stmt)
+{
+	return SUGAR kNode_GetNode(kctx, stmt, KSymbol_ExprPattern, NULL);
+}
+
+static kunused kMethod* CallNode_getMethod(kNode *expr)
+{
+	return expr->NodeList->MethodItems[0];
+}
+
+static kunused kNode *kNode_GetNode(KonohaContext *kctx, kNode *stmt, ksymbol_t kw)
+{
+	return SUGAR kNode_GetNode(kctx, stmt, kw, NULL);
+}
+
+static kunused int CallNode_getArgCount(kNode *node)
+{
+	return kArray_size(node->NodeList) - 2;
+}
+
+static kunused kString *kNode_getErrorMessage(KonohaContext *kctx, kNode *stmt)
+{
+	kString* msg = stmt->ErrorMessage;
+	DBG_ASSERT(IS_String(msg));
+	return msg;
+}
+
+#endif
+
+#endif /* end of include guard */
