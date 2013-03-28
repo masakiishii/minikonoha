@@ -22,12 +22,14 @@
  * ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  ***************************************************************************/
 
+#ifndef _MSC_VER
 #define USE_DIRECT_THREADED_CODE
+#endif
 #define USE_EXECUTIONENGINE
 
-#include <konoha3/konoha.h>
-#include <konoha3/sugar.h>
-#include <konoha3/import/module.h>
+#include "konoha3/konoha.h"
+#include "konoha3/sugar.h"
+#include "konoha3/import/module.h"
 #include "minivm.h"
 
 #ifdef __cplusplus
@@ -262,7 +264,7 @@ struct KBuilder { /* MiniVM Builder */
 	intptr_t   InstructionSize;
 };
 
-typedef struct BasicBlock {
+typedef struct tagBasicBlock {
 	long     incoming;
 	bblock_t newid;
 	bblock_t nextid;
@@ -606,7 +608,7 @@ typedef struct LocalVarInfo {
 } LocalVarInfo;
 
 #ifndef LOG2
-#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - __builtin_clzl((N) - 1)))
+#define LOG2(N) ((unsigned)((sizeof(void *) * 8) - CLZ((N) - 1)))
 #endif
 
 static intptr_t AddLocal(KonohaContext *kctx, KBuilder *builder, intptr_t index, ksymbol_t sym, ktypeattr_t type)
@@ -1289,7 +1291,7 @@ static struct KVirtualCode *MiniVM_GenerateVirtualCode(KonohaContext *kctx, kMet
 {
 	KVirtualCode *vcode;
 	KBuffer wb;
-	KBuilder builderbuf = {}, *builder = &builderbuf;
+	KBuilder builderbuf = {{0}}, *builder = &builderbuf;
 	kNameSpace *ns = kNode_ns(block);
 
 	INIT_GCSTACK();
@@ -1341,7 +1343,7 @@ static struct KVirtualCode *BOOTCODE_NCALL = NULL;
 static void SetUpBootCode(void)
 {
 	if(BOOTCODE_ENTER == NULL) {
-		static struct KVirtualCode InitCode[6] = {};
+		static struct KVirtualCode InitCode[6] = {{0}};
 		struct OPTHCODE thcode = {OP_(THCODE), 4 * sizeof(KVirtualCode), _THCODE};
 		struct OPNCALL ncall = {OP_(NCALL)};
 		struct OPENTER enter = {OP_(ENTER)};
